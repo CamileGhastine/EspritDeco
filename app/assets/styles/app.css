@@ -1,3 +1,4 @@
-body {
-    background-color: skyblue;
-}
+@import './general.css';
+@import './bootswatch.css';
+@import './header.css';
+@import './nav.css';
