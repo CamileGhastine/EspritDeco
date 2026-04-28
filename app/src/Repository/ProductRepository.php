@@ -19,7 +19,7 @@ class ProductRepository extends ServiceEntityRepository
        /**
         * @return Product[] Returns an array of Product objects
         */
-       public function findALlWithCategoryAndPrincipalImage(): array
+       public function findAllWithCategoryAndPrincipalImage(): array
        {
            return $this->createQueryBuilder('p')
                 ->leftJoin('p.category', 'c')

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Product;
 use App\Repository\ProductRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,7 +19,7 @@ final class ProductController extends AbstractController
     {
 
         return $this->render('product/index.html.twig', [
-            'products' => $this->productRepository->findALlWithCategoryAndPrincipalImage()
+            'products' => $this->productRepository->findAllWithCategoryAndPrincipalImage()
         ]);
     }
 }
