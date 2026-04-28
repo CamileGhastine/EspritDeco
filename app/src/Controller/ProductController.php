@@ -17,9 +17,16 @@ final class ProductController extends AbstractController
     #[Route('/', name: 'app_product_index')]
     public function index(): Response
     {
-
         return $this->render('product/index.html.twig', [
             'products' => $this->productRepository->findAllWithCategoryAndPrincipalImage()
+        ]);
+    }
+
+   #[Route('/show/{id<[0-9]+>}', name: 'app_product_show')]
+    public function show($id): Response
+    {
+        return $this->render('product/show.html.twig', [
+            'product' => $this->productRepository->findWithCategoryAndImages((int)$id)
         ]);
     }
 }

@@ -16,30 +16,37 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-       /**
-        * @return Product[] Returns an array of Product objects
-        */
-       public function findAllWithCategoryAndPrincipalImage(): array
-       {
-           return $this->createQueryBuilder('p')
-                ->leftJoin('p.category', 'c')
-                ->addSelect('c')
-                ->leftJoin('p.images', 'i', 'WITH', 'i.isPrincipal = :isPrincipal')
-                ->addSelect('i')
-                ->setParameter('isPrincipal', true)
-                ->orderBy('p.id', 'ASC')
-                ->getQuery()
-                ->getResult()
-           ;
-       }
+    /**
+    * @return Product[] Returns an array of Product objects
+    */
+    public function findAllWithCategoryAndPrincipalImage(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')
+            ->addSelect('c')
+            ->leftJoin('p.images', 'i', 'WITH', 'i.isPrincipal = :isPrincipal')
+            ->addSelect('i')
+            ->setParameter('isPrincipal', true)
+            ->orderBy('p.id', 'ASC')
+            ->getQuery()
+            ->getResult()
+        ;
+    }
 
-    //    public function findOneBySomeField($value): ?Product
-    //    {
-    //        return $this->createQueryBuilder('p')
-    //            ->andWhere('p.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    /**
+    * @return Product
+    */
+    public function findWithCategoryAndImages($id): Product
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.category', 'c')
+            ->addSelect('c')
+            ->leftJoin('p.images', 'i')
+            ->addSelect('i')
+            ->where('p.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
 }
