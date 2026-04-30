@@ -34,7 +34,7 @@ final class AdminProductController extends AbstractController
             if ($imageFile) {
                 $image = $imageHandler->uploadImage($imageFile, $product);
 
-                if (!$image) return $this->redirectToRoute('app_admin_product_save');
+                if (!$image) return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
 
                 $em->persist($image);
                 $product->addImage($image);
@@ -42,7 +42,7 @@ final class AdminProductController extends AbstractController
 
             $em->persist($product);
             $em->flush();
-            $this->addFlash('success', 'Le produit a été ajouté avec succès.');
+            $this->addFlash('success', 'Le produit a été enregistré avec succès.');
 
             return $this->redirectToRoute('app_admin_product_index');
         }

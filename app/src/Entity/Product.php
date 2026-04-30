@@ -121,4 +121,9 @@ class Product
 
         return $this;
     }
+
+    public function hasImages()
+    { 
+        return (bool)count($this->getImages());
+    }
 }

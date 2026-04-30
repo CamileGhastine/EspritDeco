@@ -26,11 +26,13 @@ class ImageHandler
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = 'img_' .uniqid() . '-' .$safeFilename . '.' . $imageFile->guessExtension();
+
             $imageFile->move('images/product', $newFilename);
+
             $image = new Image;
             $image->setPath('images/product/' . $newFilename)
                 ->setAlt($originalFilename)
-                ->setIsPrincipal(true)
+                ->setIsPrincipal(!$product->hasImages())
                 ->setProduct($product)
             ;
 
