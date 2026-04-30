@@ -22,10 +22,10 @@ final class AdminProductController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/product/save', name: 'app_admin_product_save')]
-    public function save(Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
+    #[Route('/admin/product/save/{id<[0-9]+>?}', name: 'app_admin_product_save')]
+    public function save(?Product $product, Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
     {
-        $form = $this->createForm(ProductFormType::class);
+        $form = $this->createForm(ProductFormType::class, $product);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -48,7 +48,8 @@ final class AdminProductController extends AbstractController
         }
 
         return $this->render('admin/product/save.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'isEdit' => (bool)$product
         ]);
     }
 
@@ -59,12 +60,6 @@ final class AdminProductController extends AbstractController
 
         if (!$this->isCsrfTokenValid('delete-item-' . $product->getId(), $submittedToken)) {
             $this->addFlash('danger', 'Token invalide.');
-
-            return $this->redirectToRoute('app_admin_product_index');
-        }
-
-        if (!$product) {
-            $this->addFlash('danger', 'Ce produit n\'existe pas.');
 
             return $this->redirectToRoute('app_admin_product_index');
         }
