@@ -5,7 +5,9 @@
 {% block body %}
     <h1 class="text-center my-5">Gestion des produits</h1>
     <div class="text-center mb-4">
-        <button class="badge rounded-pill bg-primary">➕</button>
+        <a href="{{ path('app_admin_product_save') }}" class="badge rounded-pill bg-primary text-decoration-none">
+            ➕
+        </a>
     </div>
     
     <table class="table table-hover">
@@ -21,7 +23,11 @@
         <tbody>
             {% for i, product in products %}
                 <tr class="table-{{ i%2 ? 'secondary' : 'light'}}">
-                    <td class="text-center">{{ product.title }}</td>
+                    <td class="text-center">
+                        <a href="{{ path('app_product_show', {id: product.id}) }}" class="text-decoration-none">
+                            {{ product.title }}
+                        </a>
+                    </td>
                     <td class="text-center">{{ product.price }} €</td>
                     <td class="text-center">{{ product.category.name }}</td>
                     <td class="text-center">✏️</td>
@@ -35,4 +41,9 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="text-center mb-5">
+         <a href="{{ path('app_admin_panel') }}" class="btn btn-primary">
+            Retour
+        </a>
+    </div>
 {% endblock %}
