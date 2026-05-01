@@ -2,6 +2,7 @@
 namespace App\Service;
 
 use App\Entity\Image;
+use App\Entity\Product;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -18,6 +19,17 @@ class ImageHandler
         )
     {
         $this->session = $this->requestStack->getSession();
+    }
+
+    public function deleteFiles(Product $product)
+    {
+        foreach ($product->getImages() as $image) {
+            $filePath = $image->getPath();
+
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
     }
 
     public function uploadImage(UploadedFile $imageFile, $product)
