@@ -5,6 +5,7 @@ namespace App\Controller\AdminController;
 use App\Entity\Product;
 use App\Form\ProductFormType;
 use App\Repository\ProductRepository;
+use App\Service\ImageHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Service\ImageHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -53,7 +54,7 @@ final class AdminProductController extends AbstractController
     }
 
     #[Route('/admin/product/delete/{id<[0-9]+>}', name: 'app_admin_product_delete')]
-    public function delete(Product $product, Request $request, EntityManagerInterface $em): Response
+    public function delete(Product $product, Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
     {
         $submittedToken = $request->getPayload()->get('token');
 
@@ -63,11 +64,7 @@ final class AdminProductController extends AbstractController
             return $this->redirectToRoute('app_admin_product_index');
         }
 
-        if (!$product) {
-            $this->addFlash('danger', 'Ce produit n\'existe pas.');
-
-            return $this->redirectToRoute('app_admin_product_index');
-        }
+        $imageHandler->deleteFiles($product);
 
         $em->remove($product);
         $em->flush();
