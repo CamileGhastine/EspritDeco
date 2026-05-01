@@ -82,8 +82,10 @@ final class AdminProductController extends AbstractController
     }
 
     #[Route('/admin/product/image/delete/{id<[0-9]+>}', name: 'app_admin_image_delete')]
-    public function deleteImage(Image $image, Request $request, EntityManagerInterface $em): Response
+    public function deleteImageAjax(Image $image, Request $request, EntityManagerInterface $em): Response
     {
+        if($image->isPrincipal()) return $this->json(['error' => true]);
+        
         $productId = $image->getProduct()->getId();
 
         $submittedToken = $request->getPayload()->get('token');
@@ -101,16 +103,13 @@ final class AdminProductController extends AbstractController
         $em->remove($image);
         $em->flush();
 
-        $this->addFlash('success', 'Image supprimée.');
-
-        return $this->redirectToRoute('app_admin_product_save', ['id' => $productId]);
+        return $this->json(['success' => true]);
     }
     
     #[Route('/admin/product/image/principal/{id<[0-9]+>}', name: 'app_admin_image_principal')]
-    public function setImagePrincipal(Image $image, Request $request, EntityManagerInterface $em): Response
+    public function setImagePrincipalAjax(Image $image, Request $request, EntityManagerInterface $em): Response
     {
         $product = $image->getProduct();
-
         $submittedToken = $request->getPayload()->get('token');
         if (!$this->isCsrfTokenValid('principal-image-' . $image->getId(), $submittedToken)) {
             $this->addFlash('danger', 'Token invalide.');
@@ -127,7 +126,6 @@ final class AdminProductController extends AbstractController
 
         $em->flush();
 
-        $this->addFlash('success', 'Image principale mise à jour.');
-        return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
+        return $this->json(['success' => true]);
     }
 }

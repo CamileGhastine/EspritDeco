@@ -26,22 +26,27 @@
     </div>
     {% if isEdit and product is defined and product.images is not empty %}
         {% for image in product.images %}
-            <div class="card m-3 card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
+            <div id="image-card-{{ image.id }}" class="card m-3 card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
                 <img src="{{ asset(image.path) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
                 <div class="card-body p-1 text-center">
-                    {% if image.isPrincipal %}
-                        <span class="badge bg-primary mb-1">Principale</span>
-                    {% else %}
-                        <form method="post" action="{{ path('app_admin_image_principal', {id: image.id}) }}">
-                            <input type="hidden" name="token" value="{{ csrf_token('principal-image-' ~ image.id) }}">
-                            <button type="submit" class="btn btn-outline-primary btn-sm mt-1">⭐</button>
-                        </form>
-                    {% endif %}
-                    <form method="post" action="{{ path('app_admin_image_delete', {id: image.id}) }}"
-                        onsubmit="return confirm('Supprimer cette image ?')">
-                        <input type="hidden" name="token" value="{{ csrf_token('delete-image-' ~ image.id) }}">
-                        <button type="submit" class="btn btn-outline-primary btn-sm mt-1">❌</button>
-                    </form>
+                    <span class="badge bg-primary mb-1 {{ image.isPrincipal ? '' : 'd-none' }}" id="badge-principal-{{ image.id }}">
+                        Principale
+                    </span>
+                    <span type="button"
+                        class="{{ image.isPrincipal ? 'd-none' : '' }}"
+                        id="btn-principal-{{ image.id }}"
+                        data-id="{{ image.id }}"
+                        data-token="{{ csrf_token('principal-image-' ~ image.id) }}"
+                        onclick="setPrincipal(this)">
+                        ⭐
+                    </span>                    
+                    <span type="button"
+                        class="mt-1 pointer"
+                        data-id="{{ image.id }}"
+                        data-token="{{ csrf_token('delete-image-' ~ image.id) }}"
+                        onclick="deleteImage(this)">
+                        ❌
+                    </span>
                 </div>
             </div>
         {% endfor %}
@@ -53,14 +58,57 @@
     </div>
 
     <script>
-    document.getElementById('add-image-btn').addEventListener('click', () => {
-        const container = document.getElementById('extra-images');
-        const div = document.createElement('div');
-        div.className = 'mb-2';
-        div.innerHTML = `
-            <input type="file" name="product_form[images][]" accept="image/jpeg,image/png,image/webp" class="form-control">
-        `;
-        container.appendChild(div);
-    });
+        document.getElementById('add-image-btn').addEventListener('click', () => {
+            const container = document.getElementById('extra-images');
+            const div = document.createElement('div');
+            div.className = 'mb-2';
+            div.innerHTML = `
+                <input type="file" name="product_form[images][]" accept="image/jpeg,image/png,image/webp" class="form-control">
+            `;
+            container.appendChild(div);
+        });
+
+        async function setPrincipal(btn) {
+            const id = btn.dataset.id;
+            const token = btn.dataset.token;
+
+            const res = await fetch(`/admin/product/image/principal/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `token=${token}`
+            });
+
+            const data = await res.json();
+                if (data.success) {
+                    // Retirer le badge, afficher le bouton et modifier les bordure sur toutes les cartes
+                    document.querySelectorAll('[id^="badge-principal-"]').forEach(el => el.classList.add('d-none'));
+                    document.querySelectorAll('[id^="btn-principal-"]').forEach(el => el.classList.remove('d-none'));
+                    document.getElementById(`badge-principal-${id}`).classList.remove('d-none');
+                    document.getElementById(`btn-principal-${id}`).classList.add('d-none');
+                    document.querySelectorAll('.card-minotaur').forEach(el => el.classList.remove('border-primary','border-3'));
+                    btn.closest('.card-minotaur').classList.add('border-primary', 'border-3');                    // Mettre à jour la carte cliquée
+
+                } else {
+                    alert(data.message ?? 'Erreur.');
+                }
+            }
+
+            async function deleteImage(btn) {
+                const id = btn.dataset.id;
+                const token = btn.dataset.token;
+
+                const res = await fetch(`/admin/product/image/delete/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `token=${token}`
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById(`image-card-${id}`).remove();
+                } else {
+                    alert(data.message ?? 'Erreur lors de la suppression.');
+                }
+            }
     </script>
 {% endblock %}
