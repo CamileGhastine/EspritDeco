@@ -14,6 +14,10 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class AdminProductController extends AbstractController
 {
+    public function __construct(private ImageHandler $imageHandler)
+    {
+    }
+    
     #[Route('/admin/product', name: 'app_admin_product_index')]
     public function index(ProductRepository $productRepository): Response
     {
@@ -23,7 +27,7 @@ final class AdminProductController extends AbstractController
     }
 
     #[Route('/admin/product/save/{id<[0-9]+>?}', name: 'app_admin_product_save')]
-    public function save(?Product $product, Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
+    public function save(?Product $product, Request $request, EntityManagerInterface $em): Response
     {
         $form = $this->createForm(ProductFormType::class, $product);
         $form->handleRequest($request);
@@ -32,7 +36,7 @@ final class AdminProductController extends AbstractController
             $product = $form->getData();
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
-                $image = $imageHandler->uploadImage($imageFile, $product);
+                $image = $this->imageHandler->uploadImage($imageFile, $product);
 
                 if (!$image) return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
 
@@ -54,7 +58,7 @@ final class AdminProductController extends AbstractController
     }
 
     #[Route('/admin/product/delete/{id<[0-9]+>}', name: 'app_admin_product_delete')]
-    public function delete(Product $product, Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
+    public function delete(Product $product, Request $request, EntityManagerInterface $em): Response
     {
         $submittedToken = $request->getPayload()->get('token');
 
@@ -64,7 +68,7 @@ final class AdminProductController extends AbstractController
             return $this->redirectToRoute('app_admin_product_index');
         }
 
-        $imageHandler->deleteFiles($product);
+        $this->imageHandler->deleteFiles($product);
 
         $em->remove($product);
         $em->flush();
