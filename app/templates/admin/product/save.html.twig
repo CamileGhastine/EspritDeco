@@ -8,10 +8,19 @@
     <h1 class="my-5 text-center">{{ action }} un produit</h1>
     <div class="mb-5">
         {{ form_start(form)}}
-        {{ form_widget(form)}}
+        {{ form_row(form.title)}}
+        {{ form_row(form.description)}}
+        {{ form_row(form.price)}}
+        {{ form_row(form.category)}}
+        {{ form_row(form.images)}}
+        <div id="extra-images"></div>
+        <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="add-image-btn">
+           ➕ Ajouter une image 
+        </button>
         <div class="text-end">
             <button class="btn btn-primary">{{ action }}</button>
         </div>
+
         {{ form_end(form)}}    
     </div>
 
@@ -20,4 +29,16 @@
             Retour
         </a>
     </div>
+
+    <script>
+    document.getElementById('add-image-btn').addEventListener('click', () => {
+        const container = document.getElementById('extra-images');
+        const div = document.createElement('div');
+        div.className = 'mb-2';
+        div.innerHTML = `
+            <input type="file" name="product_form[images][]" accept="image/jpeg,image/png,image/webp" class="form-control">
+        `;
+        container.appendChild(div);
+    });
+    </script>
 {% endblock %}

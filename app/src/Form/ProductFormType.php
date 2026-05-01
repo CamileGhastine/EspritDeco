@@ -68,16 +68,22 @@ class ProductFormType extends AbstractType
                     ),
                 ],
             ])
-            ->add('image', FileType::class, [
-                'label' => 'Image',
+            ->add('images', FileType::class, [
+                'label' => 'Images',
                 'required' => false,
                 'mapped' => false,
+                'multiple' => true,
                 'constraints' => [
-                    new Assert\File(
-                        maxSize: '2M',
-                        extensions: ['jpeg', 'jpg', 'png', 'webp'],
-                    )                
-                ]
+                    new Assert\All([
+                        'constraints' => [
+                            new Assert\File(
+                                maxSize: '2M',
+                                extensions: ['jpeg', 'jpg', 'png', 'webp'],
+                            )
+                        ]
+                    ])                
+                ],
+                'attr' => ['accept' => 'image/jpeg,image/jpg, image/png,image/webp'] // validation front (HTML)
             ])
         ;
     }

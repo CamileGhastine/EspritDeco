@@ -34,14 +34,15 @@ final class AdminProductController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $product = $form->getData();
-            $imageFile = $form->get('image')->getData();
-            if ($imageFile) {
-                $image = $this->imageHandler->uploadImage($imageFile, $product);
+            $imageFiles = $form->get('images')->getData();
+            if ($imageFiles) {
+                foreach($imageFiles as $imageFile) {
+                    $image = $this->imageHandler->uploadImage($imageFile, $product);
+                    if (!$image) return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
 
-                if (!$image) return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
-
-                $em->persist($image);
-                $product->addImage($image);
+                    //$em->persist($image);
+                    $product->addImage($image);
+                }
             }
 
             $em->persist($product);
