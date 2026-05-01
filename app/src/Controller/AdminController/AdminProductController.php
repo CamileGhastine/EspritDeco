@@ -2,6 +2,7 @@
 
 namespace App\Controller\AdminController;
 
+use App\Entity\Image;
 use App\Entity\Product;
 use App\Form\ProductFormType;
 use App\Repository\ProductRepository;
@@ -54,7 +55,8 @@ final class AdminProductController extends AbstractController
 
         return $this->render('admin/product/save.html.twig', [
             'form' => $form->createView(),
-            'isEdit' => (bool)$product
+            'isEdit' => (bool)$product,
+            'product' => $product
         ]);
     }
 
@@ -77,5 +79,55 @@ final class AdminProductController extends AbstractController
         $this->addFlash('success', 'Le produit a été supprimé avec succès.');
 
         return $this->redirectToRoute('app_admin_product_index');
+    }
+
+    #[Route('/admin/product/image/delete/{id<[0-9]+>}', name: 'app_admin_image_delete')]
+    public function deleteImage(Image $image, Request $request, EntityManagerInterface $em): Response
+    {
+        $productId = $image->getProduct()->getId();
+
+        $submittedToken = $request->getPayload()->get('token');
+        if (!$this->isCsrfTokenValid('delete-image-' . $image->getId(), $submittedToken)) {
+            $this->addFlash('danger', 'Token invalide.');
+
+            return $this->redirectToRoute('app_admin_product_save', ['id' => $productId]);
+        }
+
+        $filePath = $image->getPath();
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+
+        $em->remove($image);
+        $em->flush();
+
+        $this->addFlash('success', 'Image supprimée.');
+
+        return $this->redirectToRoute('app_admin_product_save', ['id' => $productId]);
+    }
+    
+    #[Route('/admin/product/image/principal/{id<[0-9]+>}', name: 'app_admin_image_principal')]
+    public function setImagePrincipal(Image $image, Request $request, EntityManagerInterface $em): Response
+    {
+        $product = $image->getProduct();
+
+        $submittedToken = $request->getPayload()->get('token');
+        if (!$this->isCsrfTokenValid('principal-image-' . $image->getId(), $submittedToken)) {
+            $this->addFlash('danger', 'Token invalide.');
+            return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
+        }
+
+        // Retirer isPrincipal sur toutes les images du produit
+        foreach ($product->getImages() as $img) {
+            $img->setIsPrincipal(false);
+        }
+
+        // Définir la nouvelle principale
+        $image->setIsPrincipal(true);
+
+        $em->flush();
+
+        $this->addFlash('success', 'Image principale mise à jour.');
+        return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
     }
 }

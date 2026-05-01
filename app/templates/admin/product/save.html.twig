@@ -17,13 +17,35 @@
         <button type="button" class="btn btn-outline-secondary btn-sm mb-3" id="add-image-btn">
            ➕ Ajouter une image 
         </button>
+
         <div class="text-end">
             <button class="btn btn-primary">{{ action }}</button>
         </div>
 
         {{ form_end(form)}}    
     </div>
-
+    {% if isEdit and product is defined and product.images is not empty %}
+        {% for image in product.images %}
+            <div class="card m-3 card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
+                <img src="{{ asset(image.path) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
+                <div class="card-body p-1 text-center">
+                    {% if image.isPrincipal %}
+                        <span class="badge bg-primary mb-1">Principale</span>
+                    {% else %}
+                        <form method="post" action="{{ path('app_admin_image_principal', {id: image.id}) }}">
+                            <input type="hidden" name="token" value="{{ csrf_token('principal-image-' ~ image.id) }}">
+                            <button type="submit" class="btn btn-outline-primary btn-sm mt-1">⭐</button>
+                        </form>
+                    {% endif %}
+                    <form method="post" action="{{ path('app_admin_image_delete', {id: image.id}) }}"
+                        onsubmit="return confirm('Supprimer cette image ?')">
+                        <input type="hidden" name="token" value="{{ csrf_token('delete-image-' ~ image.id) }}">
+                        <button type="submit" class="btn btn-outline-primary btn-sm mt-1">❌</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="text-center mb-5">
          <a href="{{ app.request.headers.get('referer') ?? path('app_product_index') }}" class="btn btn-primary">
             Retour
