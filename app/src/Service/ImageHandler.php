@@ -32,6 +32,14 @@ class ImageHandler
         }
     }
 
+    public function deleteFile(Image $image)
+    {
+        $filePath = $image->getPath();
+        if (file_exists($filePath)) {
+            unlink($filePath);
+        }
+    }
+
     public function uploadImage(UploadedFile $imageFile, $product)
     {
         try {
