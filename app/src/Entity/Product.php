@@ -28,7 +28,7 @@ class Product
     /**
      * @var Collection<int, Image>
      */
-    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'product', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: Image::class, mappedBy: 'product', orphanRemoval: true, cascade: ['persist'])]
     private Collection $images;
 
     #[ORM\ManyToOne(inversedBy: 'products')]
@@ -120,5 +120,10 @@ class Product
         $this->category = $category;
 
         return $this;
+    }
+
+    public function hasImages()
+    { 
+        return (bool)count($this->getImages());
     }
 }
