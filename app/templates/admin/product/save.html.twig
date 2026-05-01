@@ -6,7 +6,7 @@
 
 {% block body %}
     <h1 class="my-5 text-center">{{ action }} un produit</h1>
-    <div class="mb-5">
+    <div>
         {{ form_start(form)}}
         {{ form_row(form.title)}}
         {{ form_row(form.description)}}
@@ -25,32 +25,40 @@
         {{ form_end(form)}}    
     </div>
     {% if isEdit and product is defined and product.images is not empty %}
-        {% for image in product.images %}
-            <div id="image-card-{{ image.id }}" class="card m-3 card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
-                <img src="{{ asset(image.path) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
-                <div class="card-body p-1 text-center">
-                    <span class="badge bg-primary mb-1 {{ image.isPrincipal ? '' : 'd-none' }}" id="badge-principal-{{ image.id }}">
-                        Principale
-                    </span>
-                    <span type="button"
-                        class="{{ image.isPrincipal ? 'd-none' : '' }}"
-                        id="btn-principal-{{ image.id }}"
-                        data-id="{{ image.id }}"
-                        data-token="{{ csrf_token('principal-image-' ~ image.id) }}"
-                        onclick="setPrincipal(this)">
-                        ⭐
-                    </span>                    
-                    <span type="button"
-                        class="mt-1 pointer"
-                        data-id="{{ image.id }}"
-                        data-token="{{ csrf_token('delete-image-' ~ image.id) }}"
-                        onclick="deleteImage(this)">
-                        ❌
-                    </span>
+        <div class="d-flex flex-column align-items-center flex-md-row flex-wrap gap-3 mb-4">
+            {% for image in product.images %}
+                <div id="image-card-{{ image.id }}" class="card card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
+                    <img src="{{ asset(image.path) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
+                    <div class="card-body p-1 text-center row">
+                        <div class="col-6 text-center">
+                            <span class="badge bg-primary mb-1 {{ image.isPrincipal ? '' : 'd-none' }}" id="badge-star-{{ image.id }}">
+                                Principale
+                            </span>   
+                            <span type="button"
+                                class="{{ image.isPrincipal ? 'd-none' : '' }}"
+                                id="btn-star-{{ image.id }}"
+                                data-id="{{ image.id }}"
+                                data-token="{{ csrf_token('principal-image-' ~ image.id) }}"
+                                onclick="setPrincipal(this)">
+                                ⭐
+                            </span>                                                    
+                        </div>
+                        <div class="col-6 text-center">
+                            <span type="button"
+                                id="btn-delete-{{ image.id }}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteModal-{{ image.id}}"
+                                class="{{ image.isPrincipal ? 'd-none' : '' }}">
+                                ❌
+                            </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
+                {% include '_shared/_deleteImageModal.html.twig' %}
+            {% endfor %}
+        </div>
     {% endif %}
+
     <div class="text-center mb-5">
          <a href="{{ app.request.headers.get('referer') ?? path('app_product_index') }}" class="btn btn-primary">
             Retour
@@ -68,6 +76,27 @@
             container.appendChild(div);
         });
 
+        async function deleteImage(btn) {
+            const id = btn.dataset.id;
+            const token = btn.dataset.token;
+
+            const res = await fetch(`/admin/product/image/delete/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `token=${token}`
+            });
+
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById(`image-card-${id}`).remove();
+                const modalEl = document.getElementById(`deleteModal-${id}`);
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+            } else {
+                alert(data.message ?? 'Erreur lors de la suppression.');
+            }
+        }
+
         async function setPrincipal(btn) {
             const id = btn.dataset.id;
             const token = btn.dataset.token;
@@ -80,34 +109,19 @@
 
             const data = await res.json();
                 if (data.success) {
-                    // Retirer le badge, afficher le bouton et modifier les bordure sur toutes les cartes
-                    document.querySelectorAll('[id^="badge-principal-"]').forEach(el => el.classList.add('d-none'));
-                    document.querySelectorAll('[id^="btn-principal-"]').forEach(el => el.classList.remove('d-none'));
-                    document.getElementById(`badge-principal-${id}`).classList.remove('d-none');
-                    document.getElementById(`btn-principal-${id}`).classList.add('d-none');
+                    // Modification badge, bouton et bordures sur toutes les cartes
+                    document.querySelectorAll('[id^="badge-star-"]').forEach(el => el.classList.add('d-none'));
+                    document.querySelectorAll('[id^="btn-star-"]').forEach(el => el.classList.remove('d-none'));
+                    document.querySelectorAll('[id^="btn-delete-"]').forEach(el => el.classList.remove('d-none'));
+                    document.getElementById(`badge-star-${id}`).classList.remove('d-none');
+                    document.getElementById(`btn-star-${id}`).classList.add('d-none');
+                    document.getElementById(`btn-delete-${id}`).classList.add('d-none');
                     document.querySelectorAll('.card-minotaur').forEach(el => el.classList.remove('border-primary','border-3'));
-                    btn.closest('.card-minotaur').classList.add('border-primary', 'border-3');                    // Mettre à jour la carte cliquée
+                    btn.closest('.card-minotaur').classList.add('border-primary', 'border-3');
+                   // Mettre à jour la carte cliquée
 
                 } else {
                     alert(data.message ?? 'Erreur.');
-                }
-            }
-
-            async function deleteImage(btn) {
-                const id = btn.dataset.id;
-                const token = btn.dataset.token;
-
-                const res = await fetch(`/admin/product/image/delete/${id}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `token=${token}`
-                });
-
-                const data = await res.json();
-                if (data.success) {
-                    document.getElementById(`image-card-${id}`).remove();
-                } else {
-                    alert(data.message ?? 'Erreur lors de la suppression.');
                 }
             }
     </script>
