@@ -1,5 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('styles/show.css') }}">
+    <link rel="stylesheet" href="{{ asset('styles/card.css') }}">
+{% endblock %}
+
 {% block title %}Esprit Déco : {{ product.title }}{% endblock %}
 
 {% block body %}
