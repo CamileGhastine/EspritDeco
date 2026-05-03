@@ -34,7 +34,7 @@
         <div class="d-flex flex-column align-items-center flex-md-row flex-wrap gap-3 mb-4">
             {% for image in product.images %}
                 <div id="image-card-{{ image.id }}" class="card card-minotaur {{ image.isPrincipal ? 'border-primary border-3' : ''}}">
-                    <img src="{{ asset(image.path) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
+                    <img src="{{ asset(upload_product_path ~ '/' ~ image.name) }}" class="card-img-top" style="height: 100px; object-fit: cover;">
                     <div class="card-body p-1 text-center row">
                         <div class="col-6 text-center">
                             <span class="badge bg-primary mb-1 {{ image.isPrincipal ? '' : 'd-none' }}" id="badge-star-{{ image.id }}">

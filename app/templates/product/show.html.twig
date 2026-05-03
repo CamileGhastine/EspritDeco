@@ -28,7 +28,7 @@
                     <div class="carousel-inner">
                         {% for image in product.images %}
                             <div class="carousel-item {{ image.isPrincipal ? 'active' : '' }} text-center">
-                                <img src="{{ asset(image.path) }}" alt="{{ image.alt }}" class="carousel-img d-block mx-auto">
+                                <img src="{{ asset(upload_product_path ~ '/' ~ image.name) }}" alt="{{ image.alt }}" class="carousel-img d-block mx-auto">
                             </div>
                         {% endfor %}
                     </div>

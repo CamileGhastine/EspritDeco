@@ -15,7 +15,8 @@ class ImageHandler
 
     public function __construct(
         private SluggerInterface $slugger,
-        private RequestStack $requestStack
+        private RequestStack $requestStack,
+        private string $publicPath
         )
     {
         $this->session = $this->requestStack->getSession();
@@ -47,10 +48,10 @@ class ImageHandler
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = 'img_' .uniqid() . '-' .$safeFilename . '.' . $imageFile->guessExtension();
 
-            $imageFile->move('images/product', $newFilename);
+            $imageFile->move($this->publicPath, $newFilename);
 
             $image = new Image;
-            $image->setPath('images/product/' . $newFilename)
+            $image->setPath($this->publicPath . $newFilename)
                 ->setAlt($originalFilename)
                 ->setIsPrincipal(!$product->hasImages())
                 ->setProduct($product)
