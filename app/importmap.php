@@ -25,4 +25,20 @@ return [
     '@hotwired/turbo' => [
         'version' => '7.3.0',
     ],
+    'admin-product-save' => [
+        'path' => './assets/js/adminProductSave.js',
+        'entrypoint' => true,
+    ],
+    'save-css' => [
+        'path' => './assets/js/save.js',
+        'entrypoint' => true,
+    ],
+    'show-css' => [
+        'path' => './assets/js/show.js',
+        'entrypoint' => true,
+    ],
+    'card-css' => [
+        'path' => './assets/js/card.js',
+        'entrypoint' => true,
+    ],
 ];
