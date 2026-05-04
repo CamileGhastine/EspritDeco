@@ -14,7 +14,7 @@ class Image
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $path = null;
+    private ?string $name = null;
 
     #[ORM\Column(length: 255)]
     private ?string $alt = null;
@@ -31,14 +31,14 @@ class Image
         return $this->id;
     }
 
-    public function getPath(): ?string
+    public function getName(): ?string
     {
-        return $this->path;
+        return $this->name;
     }
 
-    public function setPath(string $path): static
+    public function setName(string $name): static
     {
-        $this->path = $path;
+        $this->name = $name;
 
         return $this;
     }

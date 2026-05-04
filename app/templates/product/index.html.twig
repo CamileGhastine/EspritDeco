@@ -13,7 +13,7 @@
                         </a>
                     </h2>
                     {% if product.images is not empty and product.images[0] is defined %}
-                        <img src="{{ product.images[0].path }}" alt="{{ product.images[0].alt }}">
+                        <img src="{{ upload_image_path ~ '/' ~ product.images[0].name }}" alt="{{ product.images[0].alt }}">
                     {% else %}
                         <div class="no-image bg-light">🚫</div>
                     {% endif %}

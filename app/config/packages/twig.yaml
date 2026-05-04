@@ -3,6 +3,7 @@ twig:
     form_themes: ['bootstrap_5_layout.html.twig']
     globals:
         legal_documents: '%legal_documents%'
+        upload_image_path: '%upload_image_path%' 
         
 when@test:
     twig:
