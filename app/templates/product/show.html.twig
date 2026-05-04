@@ -2,6 +2,11 @@
 
 {% block title %}Esprit Déco : {{ product.title }}{% endblock %}
 
+{% block javascripts %}
+    {{ parent()}}
+    {{ importmap('card-css') }}
+{% endblock %}
+
 {% block body %}
     <div class="row my-5">
         <div class="card">

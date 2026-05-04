@@ -1,6 +1,10 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Esprit Déco : Accueil{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('card-css') }}
+{% endblock %}
 
 {% block body %}
     <div class="row my-5">
