@@ -1,11 +1,10 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Esprit Déco : Accueil{% endblock %}
 {% block javascripts %}
     {{ parent() }}
     {{ importmap('card-css') }}
 {% endblock %}
-
-{% block title %}Esprit Déco : Accueil{% endblock %}
 
 {% block body %}
     <div class="row my-5">
@@ -18,7 +17,7 @@
                         </a>
                     </h2>
                     {% if product.images is not empty and product.images[0] is defined %}
-                        <img src="{{ upload_product_path ~ '/' ~ product.images[0].name }}" alt="{{ product.images[0].alt }}">
+                        <img src="{{ upload_image_path ~ '/' ~ product.images[0].name }}" alt="{{ product.images[0].alt }}">
                     {% else %}
                         <div class="no-image bg-light">🚫</div>
                     {% endif %}

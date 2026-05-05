@@ -30,15 +30,15 @@ return [
         'entrypoint' => true,
     ],
     'save-css' => [
-        'path' => './assets/js/save.js',
+        'path' => './assets/js/save-css.js',
         'entrypoint' => true,
     ],
     'show-css' => [
-        'path' => './assets/js/show.js',
+        'path' => './assets/js/show-css.js',
         'entrypoint' => true,
     ],
     'card-css' => [
-        'path' => './assets/js/card.js',
+        'path' => './assets/js/card-css.js',
         'entrypoint' => true,
     ],
 ];

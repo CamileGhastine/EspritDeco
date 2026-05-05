@@ -27,8 +27,10 @@
                 <div id="carouselExample" class="carousel slide my-4">
                     <div class="carousel-inner">
                         {% for image in product.images %}
-                            <div class="carousel-item {{ image.isPrincipal ? 'active' : '' }} text-center">
-                                <img src="{{ asset(upload_product_path ~ '/' ~ image.name) }}" alt="{{ image.alt }}" class="carousel-img d-block mx-auto">
+                            <div class="carousel-item {{ image.isPrincipal ? 'active' : '' }}">
+                                <div class="d-flex justify-content-center align-items-center h-100">     
+                                    <img src="{{ upload_image_path ~ '/' ~ asset(image.name) }}" alt="{{ image.alt }}" class="d-block img-fluid carousel-image mx-auto">
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
