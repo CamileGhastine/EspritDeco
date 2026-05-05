@@ -61,9 +61,10 @@
                         </div>
                     </div>     
                     <div class="col-12 col-md-6 d-flex justify-content-center my-2 my-md-0">
-                        <button class="badge rounded-pill bg-secondary border-primary border-5 w-50 text-center py-3">
+                        <a href="{{ path('app_cart_add', {id: product.id})}}"
+                            class="btn btn-secondary w-50 text-center py-3 badge rounded-pill bg-secondary border-primary border-5 w-50 text-center py-3">
                             Ajouter au panier
-                        </button>
+                        </a>
                     </div>                
                 </div>
             </div>
