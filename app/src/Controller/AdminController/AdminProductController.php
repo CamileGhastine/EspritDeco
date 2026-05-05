@@ -39,6 +39,7 @@ final class AdminProductController extends AbstractController
             if ($imageFiles) {
                 foreach($imageFiles as $imageFile) {
                     $image = $this->imageHandler->uploadImage($imageFile, $product);
+
                     if (!$image){
                         $this->addFlash('danger', 'Erreur d\'upload d\'image');
                         continue;

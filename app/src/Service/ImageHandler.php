@@ -16,7 +16,8 @@ class ImageHandler
     public function __construct(
         private SluggerInterface $slugger,
         private RequestStack $requestStack,
-        private string $publicPath
+        private string $publicPath,
+        private string $publicDirectory
         )
     {
         $this->session = $this->requestStack->getSession();
@@ -25,19 +26,19 @@ class ImageHandler
     public function deleteFiles(Product $product)
     {
         foreach ($product->getImages() as $image) {
-            $filePath = $image->getPath();
+            $fileName = $image->getName();
 
-            if (file_exists($filePath)) {
-                unlink($filePath);
+            if (file_exists($this->publicDirectory . '/' .$this->publicPath . '/' . $fileName)) {
+                unlink($this->publicDirectory . '/' .$this->publicPath . '/'. $fileName);
             }
         }
     }
 
     public function deleteFile(Image $image)
     {
-        $filePath = $image->getPath();
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        $fileName = $image->getName();
+        if (file_exists($this->publicDirectory . '/' .$this->publicPath . '/' . $fileName)) {
+            unlink($this->publicDirectory . '/' .$this->publicPath . '/' . $fileName);
         }
     }
 
@@ -47,16 +48,15 @@ class ImageHandler
             $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $this->slugger->slug($originalFilename);
             $newFilename = 'img_' .uniqid() . '-' .$safeFilename . '.' . $imageFile->guessExtension();
-
-            $imageFile->move($this->publicPath, $newFilename);
+            $imageFile->move($this->publicDirectory . '/' .$this->publicPath, $newFilename);
 
             $image = new Image;
-            $image->setPath($this->publicPath . $newFilename)
+            $image->setName($newFilename)
                 ->setAlt($originalFilename)
                 ->setIsPrincipal(!$product->hasImages())
                 ->setProduct($product)
             ;
-
+            
             return $image;
         } catch (FileException $e) {
             $this->session->getFlashBag()->add('danger', 'Erreur lors de l’upload de l’image.');
