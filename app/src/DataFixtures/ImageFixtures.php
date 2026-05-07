@@ -22,7 +22,7 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
             $bool = true;
             for ($j = 0; $j < $nbrImage; $j++) { 
                 $image = new Image;
-                $image->setPath('images/product/image' . rand(1, 20) . '.webp')
+                $image->setName('image' . rand(1, 20) . '.webp')
                     ->setAlt($faker->words(rand(3,10), true))
                     ->setIsPrincipal($bool)
                     ->setProduct($this->getReference('product' . $i, Product::class))

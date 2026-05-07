@@ -10,6 +10,7 @@ parameters:
     legal_documents:
         cgv: 'docs/cgv.pdf'
     upload_image_path: '/images/product'
+    public_directory: '%kernel.project_dir%/public'
 
 services:
     # default configuration for services in *this* file
@@ -24,3 +25,7 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Service\ImageHandler:
+        arguments:
+            $publicPath: '%upload_image_path%'
+            $publicDirectory: '%public_directory%'

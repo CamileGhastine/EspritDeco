@@ -2,6 +2,7 @@
 
 namespace App\Controller\AdminController;
 
+use App\Entity\Image;
 use App\Entity\Product;
 use App\Form\ProductFormType;
 use App\Repository\ProductRepository;
@@ -34,14 +35,17 @@ final class AdminProductController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $product = $form->getData();
-            $imageFile = $form->get('image')->getData();
-            if ($imageFile) {
-                $image = $this->imageHandler->uploadImage($imageFile, $product);
+            $imageFiles = $form->get('images')->getData();
+            if ($imageFiles) {
+                foreach($imageFiles as $imageFile) {
+                    $image = $this->imageHandler->uploadImage($imageFile, $product);
 
-                if (!$image) return $this->redirectToRoute('app_admin_product_save', ['id' => $product->getId()]);
-
-                $em->persist($image);
-                $product->addImage($image);
+                    if (!$image){
+                        $this->addFlash('danger', 'Erreur d\'upload d\'image');
+                        continue;
+                    }
+                    $product->addImage($image);
+                }
             }
 
             $em->persist($product);
@@ -53,7 +57,8 @@ final class AdminProductController extends AbstractController
 
         return $this->render('admin/product/save.html.twig', [
             'form' => $form->createView(),
-            'isEdit' => (bool)$product
+            'isEdit' => (bool)$product,
+            'product' => $product
         ]);
     }
 
@@ -61,7 +66,6 @@ final class AdminProductController extends AbstractController
     public function delete(Product $product, Request $request, EntityManagerInterface $em): Response
     {
         $submittedToken = $request->getPayload()->get('token');
-
         if (!$this->isCsrfTokenValid('delete-item-' . $product->getId(), $submittedToken)) {
             $this->addFlash('danger', 'Token invalide.');
 
@@ -69,12 +73,48 @@ final class AdminProductController extends AbstractController
         }
 
         $this->imageHandler->deleteFiles($product);
-
         $em->remove($product);
         $em->flush();
 
         $this->addFlash('success', 'Le produit a été supprimé avec succès.');
 
         return $this->redirectToRoute('app_admin_product_index');
+    }
+
+    #[Route('/admin/product/image/delete/{id<[0-9]+>}', name: 'app_admin_image_delete')]
+    public function deleteImageAjax(Image $image, Request $request, EntityManagerInterface $em): Response
+    {
+        if($image->isPrincipal()) return $this->json(['success' => false, 'message' => 'Impossible de supprimer l\'image prinicpale']);
+        
+        $submittedToken = $request->getPayload()->get('token');
+        if (!$this->isCsrfTokenValid('delete-image-' . $image->getId(), $submittedToken)) {
+            return $this->json(['success' => false, 'message' => 'Token invalide']);        
+        }
+
+        $this->imageHandler->deleteFile($image);
+        $em->remove($image);
+        $em->flush();
+
+        return $this->json(['success' => true]);
+    }
+    
+    #[Route('/admin/product/image/principal/{id<[0-9]+>}', name: 'app_admin_image_principal')]
+    public function setImagePrincipalAjax(Image $image, Request $request, EntityManagerInterface $em): Response
+    {
+        $submittedToken = $request->getPayload()->get('token');
+        if (!$this->isCsrfTokenValid('principal-image-' . $image->getId(), $submittedToken)) {
+            return $this->json(['success' => false, 'message' => 'Token invalide']);        
+        }
+
+        // Retirer isPrincipal sur toutes les images du produit
+        foreach ($image->getProduct()->getImages() as $img) {
+            $img->setIsPrincipal(false);
+        }
+
+        // Définir la nouvelle principale
+        $image->setIsPrincipal(true);
+        $em->flush();
+
+        return $this->json(['success' => true]);
     }
 }

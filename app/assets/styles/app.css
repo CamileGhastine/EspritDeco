@@ -1,6 +1,12 @@
-@import './general.css';
-@import './bootswatch.css';
-@import './header.css';
-@import './nav.css';
-@import './card.css';
-@import './show.css';
+html, body {
+    overflow-x: hidden;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.pointer {
+    cursor: pointer;
+}

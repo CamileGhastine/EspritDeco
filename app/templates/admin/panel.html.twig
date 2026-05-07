@@ -5,7 +5,7 @@
 {% block body %}
 <h1 class="text-center my-5">Espace administrateur</h1>
 <p class="text-center mb-5">Choisissez une section pour gérer une des entités ci-dessous.</p>
-<div class="d-grid gap-2">
+<div class="d-grid gap-2 mb-5">
     {% for entity in entities %}
         <a href="{{ path(entity.path)}}" class="btn btn-lg btn-{{ entity.color}}" >{{ entity.name }}</a>
     {% endfor %}

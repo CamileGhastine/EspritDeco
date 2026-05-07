@@ -1,11 +1,12 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Esprit Déco : {{ product.title }}{% endblock %}
-
 {% block javascripts %}
-    {{ parent()}}
+    {{ parent() }}
     {{ importmap('card-css') }}
+    {{ importmap('save-css') }}
 {% endblock %}
+
+{% block title %}Esprit Déco : {{ product.title }}{% endblock %}
 
 {% block body %}
     <div class="row my-5">
@@ -26,8 +27,10 @@
                 <div id="carouselExample" class="carousel slide my-4">
                     <div class="carousel-inner">
                         {% for image in product.images %}
-                            <div class="carousel-item {{ image.isPrincipal ? 'active' : '' }} text-center">
-                                <img src="{{ upload_image_path ~ '/' ~ asset(image.name) }}" alt="{{ image.alt }}">
+                            <div class="carousel-item {{ image.isPrincipal ? 'active' : '' }}">
+                                <div class="d-flex justify-content-center align-items-center h-100">     
+                                    <img src="{{ upload_image_path ~ '/' ~ asset(image.name) }}" alt="{{ image.alt }}" class="d-block img-fluid carousel-image mx-auto">
+                                </div>
                             </div>
                         {% endfor %}
                     </div>
