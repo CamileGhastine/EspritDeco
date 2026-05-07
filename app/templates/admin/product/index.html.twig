@@ -30,7 +30,11 @@
                     </td>
                     <td class="text-center">{{ product.price }} €</td>
                     <td class="text-center">{{ product.category.name }}</td>
-                    <td class="text-center">✏️</td>
+                    <td class="text-center">
+                        <a href="{{ path('app_admin_product_save', {id: product.id}) }}" class="text-decoration-none">
+                            ✏️
+                        </a>
+                    </td>
                     <td class="text-center">
                         <div class="pointer" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ product.id}}">
                             ❌
