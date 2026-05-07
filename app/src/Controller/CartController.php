@@ -46,14 +46,6 @@ final class CartController extends AbstractController
         ]);
     }
 
-    #[Route('/cart/clear', name: 'app_cart_clear')]
-    public function clearAjax(SessionInterface $session, Request $request)
-    {
-        $session->remove('cart');
-
-        return new JsonResponse(['success' => true]);    
-    }
-
     private function addToCart(Product $product, SessionInterface $session): array
     {
         $cart = $session->get('cart', []);
@@ -63,4 +55,47 @@ final class CartController extends AbstractController
         return $cart;
     }
 
+    #[Route('/cart/clear', name: 'app_cart_clear')]
+    public function clearAjax(SessionInterface $session, Request $request)
+    {
+        $session->remove('cart');
+
+        return new JsonResponse(['success' => true]);    
+    }
+
+    private function removeFromCart(Product $product, SessionInterface $session): array
+    {
+        $cart = $session->get('cart', []);
+        $productId = $product->getId();
+
+        if (!isset($cart[$productId])) {
+            return $cart;
+        }
+
+        $cart[$productId]--;
+
+        if ($cart[$productId] <= 0) {
+            unset($cart[$productId]);
+        }
+
+        $session->set('cart', $cart);
+        return $cart;
+    }
+
+    #[Route('/cart/decrease/{id<[0-9]+>}', name: 'app_cart_decrease', methods: ['POST'])]
+    public function decrease(Product $product, SessionInterface $session, CartHandler $cartHandler): JsonResponse
+    {
+        $cart     = $this->removeFromCart($product, $session);
+        $newQty   = $cart[$product->getId()] ?? 0;
+        $cartData = $cartHandler->getCart();
+
+        return new JsonResponse([
+            'success'    => true,
+            'newQty'     => $newQty,
+            'linePrice'  => round($newQty * $product->getPrice(), 2),
+            'totalPrice' => $cartData['totalPrice'],
+            'totalQty'   => array_sum($cart),
+            'removed'    => $newQty === 0,
+        ]);
+    }
 }

@@ -38,3 +38,32 @@ document.addEventListener('click', (e) => {
         })
         .catch(err => console.error(err));
 });
+
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.decrease-cart');
+    if (!btn) return;
+
+    fetch(btn.dataset.url, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.success) return;
+
+        const row = btn.closest('tr');
+        if (data.removed) {
+            row.remove();
+        } else {
+            row.querySelector('.item-qty').textContent = data.newQty;
+            row.querySelector('.line-total').textContent = data.linePrice.toFixed(2) + ' €';
+        }
+
+        document.getElementById('cart-total').textContent = data.totalPrice.toFixed(2) + ' €';
+        document.getElementById('nbr-items').textContent = data.totalQty;
+        if (data.totalQty === 0) {
+            document.querySelector('.offcanvas-body').innerHTML = '<p>Votre panier est vide</p>';
+        }
+    })
+    .catch(err => console.error(err));
+});

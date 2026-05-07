@@ -44,4 +44,6 @@ class CartHandler
 
         return array_sum($cart);
     }
+
+
 }
