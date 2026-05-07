@@ -9,3 +9,4 @@ import './styles/app.css';
 import './styles/bootswatch.css';
 import './styles/header.css';
 import './styles/nav.css';
+import './styles/cart.css';

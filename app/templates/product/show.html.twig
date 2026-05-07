@@ -61,10 +61,11 @@
                         </div>
                     </div>     
                     <div class="col-12 col-md-6 d-flex justify-content-center my-2 my-md-0">
-                        <a href="{{ path('app_cart_add', {id: product.id})}}"
-                            class="btn btn-secondary w-50 text-center py-3 badge rounded-pill bg-secondary border-primary border-5 w-50 text-center py-3">
-                            Ajouter au panier
-                        </a>
+                        <form method="post" action="{{ path('app_cart_add', {id: product.id}) }}">
+                            <button class="btn btn-secondary w-100 text-center py-3 badge rounded-pill bg-secondary border-primary border-5 w-50 text-center">
+                                Ajouter au panier
+                            </button>
+                        </form>
                     </div>                
                 </div>
             </div>
