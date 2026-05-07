@@ -12,26 +12,19 @@
         <table class="table table-hover">
             <tbody>
                     {% for item in cart.items %}
-                        <tr class="table-secondary">
-                            <td> {{ item.product.title }} ({{ item.product.price}} €)</td>
+                        <tr class="table-secondary" data-product-id="{{ item.product.id }}">
+                            <td>{{ item.product.title }} ({{ item.product.price }} €)</td>
                             <td>
-                                <span class="badge rounded-pill bg-primary pointer decrease-cart"
-                                    {# data-url="{{ path('app_cart_decrease', {id: item.product.id}) }}">-</span> #}
-                                    >
-                                    -
-                                </span>
-                                <span class="item-qty">
-                                    {{ item.quantity }}
-                                </span>                                
+                                <span class="badge rounded-pill bg-primary pointer decrease-cart">-</span>
+                                <span class="item-qty">{{ item.quantity }}</span>
                                 <span class="badge rounded-pill bg-primary pointer increase-cart"
-                                    data-url="{{ path('app_cart_increase', {id: item.product.id}) }}">
-                                    +
-                                </span>
+                                    data-url="{{ path('app_cart_increase', {id: item.product.id}) }}">+</span>
                             </td>
-                            <td>{{ item.product.price * item.quantity }} €</td>
-                        </tr>                    
+                            <td class="line-total">
+                                {{ (item.product.price * item.quantity) | number_format(2, '.', ' ') }} €
+                            </td>
+                        </tr>            
                     {% endfor %}
-
                 <tr class="table-type">
                     <td>
                         <span class="badge rounded-pill bg-primary pointer" 
@@ -40,8 +33,10 @@
                             Vider le panier
                         </span>
                     </td>
-                    <td> TOTAL</td>
-                    <td>{{ cart.totalPrice }} €</td>
+                    <td>TOTAL</td>
+                    <td id="cart-total">
+                        {{ (cart.totalPrice) | number_format(2, '.', ' ') }} €  
+                    </td>
                 </tr>
             </tbody>
         </table>

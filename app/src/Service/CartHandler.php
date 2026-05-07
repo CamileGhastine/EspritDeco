@@ -29,12 +29,12 @@ class CartHandler
                 'quantity' => $qty,
             ];
 
-            $totalPrice += $qty * $product->getPrice();
+            $totalPrice += $qty * (float)$product->getPrice();
         }
 
         return [
             'items' => $items,
-            'totalPrice' => $totalPrice
+            'totalPrice' => round((float) $totalPrice, 2)
             ];
     }
 

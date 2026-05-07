@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Repository\ProductRepository;
+use App\Service\CartHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,13 +17,7 @@ final class CartController extends AbstractController
     #[Route('/cart/add/{id<[0-9]+>}', name: 'app_cart_add', methods: ['POST'])]
     public function add(Product $product, SessionInterface $session, ProductRepository $productRepository): Response
     {
-        $cart = $session->get('cart', []);
-
-        $productId = $product->getId();
-        $cart[$productId] = ($cart[$productId] ?? 0) + 1;
-
-        $session->set('cart', $cart);
-
+        $this->addToCart($product, $session);
         $this->addFlash(
             'success',
             $product->getTitle() . ' a été ajouté à votre panier.'
@@ -32,21 +27,23 @@ final class CartController extends AbstractController
     }
 
     #[Route('/cart/increase/{id<[0-9]+>}', name: 'app_cart_increase', methods: ['POST'])]
-    public function add(Product $product, SessionInterface $session, ProductRepository $productRepository): Response
-    {
-        $cart = $session->get('cart', []);
+    public function increaseAjax(
+        Product $product,
+        SessionInterface $session,
+        CartHandler $cartHandler
+    ): JsonResponse {
+        $cart = $this->addToCart($product, $session);
+        $newQty      = $cart[$product->getId()];
+        $linePrice   = $newQty * $product->getPrice();
+        $cartData    = $cartHandler->getCart();
 
-        $productId = $product->getId();
-        $cart[$productId] = ($cart[$productId] ?? 0) + 1;
-
-        $session->set('cart', $cart);
-
-        $this->addFlash(
-            'success',
-            $product->getTitle() . ' a été ajouté à votre panier.'
-        );
-
-        return $this->redirectToRoute('app_product_index');    
+        return new JsonResponse([
+            'success'    => true,
+            'newQty'     => $newQty,
+            'linePrice'  => $linePrice,
+            'totalPrice' => $cartData['totalPrice'],
+            'totalQty'   => array_sum($cart),
+        ]);
     }
 
     #[Route('/cart/clear', name: 'app_cart_clear')]
@@ -56,4 +53,14 @@ final class CartController extends AbstractController
 
         return new JsonResponse(['success' => true]);    
     }
+
+    private function addToCart(Product $product, SessionInterface $session): array
+    {
+        $cart = $session->get('cart', []);
+        $productId = $product->getId();
+        $cart[$productId] = ($cart[$productId] ?? 0) + 1;
+        $session->set('cart', $cart);
+        return $cart;
+    }
+
 }
