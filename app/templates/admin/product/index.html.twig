@@ -3,6 +3,32 @@
 {% block title %}Gestion des Produit{% endblock %}
 
 {% block body %}
-    <h1 class=""my-5>Gestion des produits</h1>
-    for
+    <h1 class="text-center my-5">Gestion des produits</h1>
+    <div class="text-center mb-4">
+        <button class="badge rounded-pill bg-primary">➕</button>
+    </div>
+    
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">Titre</th>
+                <th scope="col" class="text-center">Prix</th>
+                <th scope="col" class="text-center">Catégorie</th>
+                <th scope="col" class="text-center">Modifier</th>
+                <th scope="col" class="text-center">Supprimer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for i, product in products %}
+                <tr class="table-{{ i%2 ? 'secondary' : 'light'}}">
+                    <td class="text-center">{{ product.title }}</td>
+                    <td class="text-center">{{ product.price }} €</td>
+                    <td class="text-center">{{ product.category.name }}</td>
+                    <td class="text-center">✏️</td>
+                    <td class="text-center">❌</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
 {% endblock %}
