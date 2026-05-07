@@ -15,7 +15,6 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
     {
         $faker = Factory::create('FR_fr');
 
-        
         for ($i = 0; $i < 20 ; $i++) { 
             $nbrImage = rand(0,3);
             if ($nbrImage === 0) continue;
@@ -31,8 +30,6 @@ class ImageFixtures extends Fixture implements DependentFixtureInterface
                 $manager->persist($image);
                 $bool = false;
             }
-
-
         }
         
         $manager->flush();

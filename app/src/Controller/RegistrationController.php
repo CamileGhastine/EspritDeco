@@ -52,6 +52,8 @@ class RegistrationController extends AbstractController
 
             // do anything else you need here, like send an email
 
+            $this->addFlash('success', 'Un message de validation a été envoyé sur votre boite mail.');
+
             return $security->login($user, 'form_login', 'main');
         }
 

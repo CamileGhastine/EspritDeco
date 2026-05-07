@@ -3,9 +3,11 @@
 namespace App\Controller\AdminController;
 
 use App\Entity\Product;
+use App\Form\ProductFormType;
 use App\Repository\ProductRepository;
 use App\Service\ImageHandler;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Service\ImageHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +20,36 @@ final class AdminProductController extends AbstractController
     {
         return $this->render('admin/product/index.html.twig', [
             'products' => $productRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/admin/product/save', name: 'app_admin_product_save')]
+    public function save(Request $request, EntityManagerInterface $em, ImageHandler $imageHandler): Response
+    {
+        $form = $this->createForm(ProductFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $product = $form->getData();
+            $imageFile = $form->get('image')->getData();
+            if ($imageFile) {
+                $image = $imageHandler->uploadImage($imageFile, $product);
+
+                if (!$image) return $this->redirectToRoute('app_admin_product_save');
+
+                $em->persist($image);
+                $product->addImage($image);
+            }
+
+            $em->persist($product);
+            $em->flush();
+            $this->addFlash('success', 'Le produit a été ajouté avec succès.');
+
+            return $this->redirectToRoute('app_admin_product_index');
+        }
+
+        return $this->render('admin/product/save.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 
