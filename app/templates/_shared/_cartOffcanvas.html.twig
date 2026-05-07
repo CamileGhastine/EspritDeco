@@ -15,9 +15,18 @@
                         <tr class="table-secondary">
                             <td> {{ item.product.title }} ({{ item.product.price}} €)</td>
                             <td>
-                                <span class="badge rounded-pill bg-primary">-</span>
-                                {{ item.quantity }}
-                                <span class="badge rounded-pill bg-primary">+</span>
+                                <span class="badge rounded-pill bg-primary pointer decrease-cart"
+                                    {# data-url="{{ path('app_cart_decrease', {id: item.product.id}) }}">-</span> #}
+                                    >
+                                    -
+                                </span>
+                                <span class="item-qty">
+                                    {{ item.quantity }}
+                                </span>                                
+                                <span class="badge rounded-pill bg-primary pointer increase-cart"
+                                    data-url="{{ path('app_cart_increase', {id: item.product.id}) }}">
+                                    +
+                                </span>
                             </td>
                             <td>{{ item.product.price * item.quantity }} €</td>
                         </tr>                    
@@ -25,7 +34,11 @@
 
                 <tr class="table-type">
                     <td>
-                        <span class="badge rounded-pill bg-primary">Vider le panier</span>
+                        <span class="badge rounded-pill bg-primary pointer" 
+                            id="clear-cart"
+                            data-url="{{ path('app_cart_clear') }}">
+                            Vider le panier
+                        </span>
                     </td>
                     <td> TOTAL</td>
                     <td>{{ cart.totalPrice }} €</td>

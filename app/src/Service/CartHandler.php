@@ -37,4 +37,11 @@ class CartHandler
             'totalPrice' => $totalPrice
             ];
     }
+
+    public function getTotalQuantity(): int
+    {
+        $cart = $this->request->getSession()->get('cart', []);
+
+        return array_sum($cart);
+    }
 }
