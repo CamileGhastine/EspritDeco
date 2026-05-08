@@ -95,20 +95,46 @@ final class CartController extends AbstractController
 
     private function removeFromCart(Product $product, SessionInterface $session): array
     {
-        $cart = $session->get('cart', []);
-        $productId = $product->getId();
+        if (!$this->getUser()) {
+            $cart = $session->get('cart', []);
+            $productId = $product->getId();
 
-        if (!isset($cart[$productId])) {
-            return $cart;
+            if (!isset($cart[$productId])) {
+                return $cart;
+            }
+
+            $cart[$productId]--;
+
+            if ($cart[$productId] <= 0) {
+                unset($cart[$productId]);
+            }
+
+            $session->set('cart', $cart);
+        } else {
+            $cartDb = $this->cartHandler->getCart($this->getUser());
+            $existingLine = $this->cartHandler->findExistingCartLine($cartDb, $product->getId());
+            if ($existingLine) {
+                if ($existingLine->getQuantity() > 1) {
+                    $existingLine->setQuantity($existingLine->getQuantity() - 1);
+                    $this->em->persist($cartDb);
+                } else {
+                    $cartDb->removeCartLine($existingLine);
+                    $this->em->remove($existingLine);
+                }
+
+                if (($cartDb->getCartLines())->count() === 0) {
+                    $this->em->remove($cartDb);
+                }
+
+                $this->em->flush();
+            }
+            
+            $cart = [];
+            foreach ($cartDb->getCartLines() as $cartLine) {
+                $cart[$cartLine->getProduct()->getId()] = $cartLine->getQuantity();
+            } 
         }
 
-        $cart[$productId]--;
-
-        if ($cart[$productId] <= 0) {
-            unset($cart[$productId]);
-        }
-
-        $session->set('cart', $cart);
         return $cart;
     }
 
