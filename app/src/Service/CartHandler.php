@@ -2,8 +2,11 @@
 
 namespace App\Service;
 
+use App\Entity\Cart;
+use App\Entity\CartLine;
 use App\Entity\User;
 use App\Repository\ProductRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartHandler
@@ -11,6 +14,7 @@ class CartHandler
     public function __construct(
         private RequestStack $request,
         private ProductRepository $productRepository,
+        private EntityManagerInterface $em,
         ) {}
 
     public function getCart(): array
@@ -48,13 +52,26 @@ class CartHandler
 
     public function persistCart(User $user)
     {
-        if (!$user) return;
+        $session = $this->request->getSession();
+        if (!$session->get('cart')) return;
 
-        $cart = $this->getCart();
+        $cart = new Cart($user);
 
-        dump($cart);
+        foreach ($session->get('cart') as $productId => $qty) {            
+            $product = $this->productRepository->find($productId);
 
+            if (!$product) continue;
+
+            $cartLine = new CartLine;
+            $cartLine->setProduct($product)
+                ->setQuantity($qty)
+                ;
+            $cart->addCartLine($cartLine);
+        }
+
+        $this->em->persist($cart);
+        $this->em->flush();
+
+        $session->remove('cart');
     }
-
-
 }

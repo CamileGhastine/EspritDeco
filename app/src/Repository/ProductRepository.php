@@ -49,4 +49,13 @@ class ProductRepository extends ServiceEntityRepository
             ->getOneOrNullResult()
         ;
     }
+
+    public function findByIds(array $ids): array
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+    }
 }

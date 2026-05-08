@@ -24,9 +24,6 @@ class CartLine
     #[ORM\Column]
     private ?int $quantity = null;
 
-    #[ORM\Column]
-    private ?float $unitPrice = null;
-
     public function getId(): ?int
     {
         return $this->id;
@@ -64,18 +61,6 @@ class CartLine
     public function setQuantity(int $quantity): static
     {
         $this->quantity = $quantity;
-
-        return $this;
-    }
-
-    public function getUnitPrice(): ?float
-    {
-        return $this->unitPrice;
-    }
-
-    public function setUnitPrice(float $unitPrice): static
-    {
-        $this->unitPrice = $unitPrice;
 
         return $this;
     }

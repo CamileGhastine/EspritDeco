@@ -22,23 +22,19 @@ class Cart
     #[ORM\OneToOne(inversedBy: 'cart', cascade: ['persist', 'remove'])]
     private ?User $user = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
     #[ORM\Column(length: 255)]
     private ?string $status = null;
 
     /**
      * @var Collection<int, CartLine>
      */
-    #[ORM\OneToMany(targetEntity: CartLine::class, mappedBy: 'cart', orphanRemoval: true)]
+    #[ORM\OneToMany(targetEntity: CartLine::class, mappedBy: 'cart', orphanRemoval: true, cascade: ['persist'])]
     private Collection $cartLines;
 
     public function __construct(?User $user)
     {
         $this->cartLines = new ArrayCollection();
         $this->user = $user;
-        $this->createdAt = new DateTimeImmutable('now');
         $this->status = self::OPEN;
     }
 
@@ -55,18 +51,6 @@ class Cart
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
 
         return $this;
     }
