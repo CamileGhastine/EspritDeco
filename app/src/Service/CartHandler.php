@@ -103,7 +103,7 @@ class CartHandler
         }
     }
 
-    private function getCart(User $user)
+    public function getCart(User $user)
     {
         $cart = $this->cartRepository->findOneBy([
             'user' => $user,
@@ -150,7 +150,7 @@ class CartHandler
         }
     }
 
-    private function findExistingCartLine(Cart $cart, int $productId): ?CartLine
+    public function findExistingCartLine(Cart $cart, int $productId): ?CartLine
     {
         foreach ($cart->getCartLines() as $line) {
             if ($line->getProduct()->getId() === $productId) {

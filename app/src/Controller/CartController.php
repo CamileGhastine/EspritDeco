@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\CartLine;
 use App\Entity\Product;
 use App\Service\CartHandler;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,6 +15,13 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class CartController extends AbstractController
 { 
+    public function __construct(
+        private CartHandler $cartHandler,
+        private EntityManagerInterface $em,
+        )
+    {
+    }
+
     #[Route('/cart/add/{id<[0-9]+>}', name: 'app_cart_add', methods: ['POST'])]
     public function add(Product $product, SessionInterface $session): Response
     {
@@ -30,7 +39,8 @@ final class CartController extends AbstractController
         Product $product,
         SessionInterface $session,
         CartHandler $cartHandler
-    ): JsonResponse {
+    ): JsonResponse 
+    {
         $cart = $this->addToCart($product, $session);
         $newQty      = $cart[$product->getId()];
         $linePrice   = $newQty * $product->getPrice();
@@ -47,11 +57,31 @@ final class CartController extends AbstractController
 
     private function addToCart(Product $product, SessionInterface $session): array
     {
-        $cart = $session->get('cart', []);
-        $productId = $product->getId();
-        $cart[$productId] = ($cart[$productId] ?? 0) + 1;
-        $session->set('cart', $cart);
-        
+        if (!$this->getUser()) {
+            $cart = $session->get('cart', []);
+            $productId = $product->getId();
+            $cart[$productId] = ($cart[$productId] ?? 0) + 1;
+            $session->set('cart', $cart);            
+        } else {
+            $cartDb = $this->cartHandler->getCart($this->getUser());
+            $existingLine = $this->cartHandler->findExistingCartLine($cartDb, $product->getId());
+            if ($existingLine) {
+                $existingLine->setQuantity($existingLine->getQuantity() + 1);
+            } else {
+                $cartLine = new CartLine();
+                $cartLine->setProduct($product)->setQuantity(1);
+                $cartDb->addCartLine($cartLine);
+            }
+            
+            $this->em->persist($cartDb);
+            $this->em->flush();
+            
+            $cart = [];
+            foreach ($cartDb->getCartLines() as $cartLine) {
+                $cart[$cartLine->getProduct()->getId()] = $cartLine->getQuantity();
+            } 
+        }
+
         return $cart;
     }
 
