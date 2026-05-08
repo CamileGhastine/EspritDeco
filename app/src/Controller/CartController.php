@@ -34,7 +34,7 @@ final class CartController extends AbstractController
         $cart = $this->addToCart($product, $session);
         $newQty      = $cart[$product->getId()];
         $linePrice   = $newQty * $product->getPrice();
-        $cartData    = $cartHandler->getCart();
+        $cartData    = $cartHandler->getCartDetails();
 
         return new JsonResponse([
             'success'    => true,
@@ -87,7 +87,7 @@ final class CartController extends AbstractController
     {
         $cart     = $this->removeFromCart($product, $session);
         $newQty   = $cart[$product->getId()] ?? 0;
-        $cartData = $cartHandler->getCart();
+        $cartData = $cartHandler->getCartDetails();
 
         return new JsonResponse([
             'success'    => true,

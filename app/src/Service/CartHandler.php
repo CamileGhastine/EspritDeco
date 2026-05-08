@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartHandler
@@ -17,27 +18,45 @@ class CartHandler
         private ProductRepository $productRepository,
         private EntityManagerInterface $em,
         private CartRepository $cartRepository,
+        private Security $security,
         ) {}
 
-    public function getCart(): array
+    public function getCartDetails(): array
     {
-        $cart = $this->request->getSession()->get('cart', []);
-
         $items = [];
         $totalPrice = 0;
+        $user = $this->security->getUser();
+        
+        if (!$user) {
+            $cart = $this->request->getSession()->get('cart', []);
+            foreach ($cart as $productId => $qty) {
+                $product = $this->productRepository->find($productId);
 
-        foreach ($cart as $productId => $qty) {
-            $product = $this->productRepository->find($productId);
+                if (!$product) continue;
 
-            if (!$product) continue;
+                $items[] = [
+                    'product' => $product,
+                    'quantity' => $qty,
+                ];
 
-            $items[] = [
-                'product' => $product,
-                'quantity' => $qty,
-            ];
+                $totalPrice += $qty * (float)$product->getPrice();
+            }
+        } else {
+            $cart = $this->getCart($user);
 
-            $totalPrice += $qty * (float)$product->getPrice();
-        }
+            foreach ($cart->getCartLines() as $cartLine) {
+                $product = $cartLine->getProduct();
+
+                if (!$product) continue;
+
+                $items[] = [
+                    'product' => $product,
+                    'quantity' => $cartLine->getQuantity(),
+                ];
+
+                $totalPrice += $cartLine->getQuantity() * (float)$product->getPrice();
+            }
+        } 
 
         return [
             'items' => $items,
@@ -46,10 +65,21 @@ class CartHandler
     }
 
     public function getTotalQuantity(): int
-    {
-        $cart = $this->request->getSession()->get('cart', []);
+    {       
+        $user = $this->security->getUser();
+ 
+        if (!$user) {
+            $cart = $this->request->getSession()->get('cart', []);
+            $totalItems = array_sum($cart);
+        } else {
+            $cart = $this->getCart($user);
+            $totalItems = 0;
+            foreach ($cart->getCartLines() as $cartLine) {
+                $totalItems += $cartLine->getQuantity();
+            }
+        }
 
-        return array_sum($cart);
+        return $totalItems;
     }
 
     public function persistCart(User $user)
@@ -58,6 +88,23 @@ class CartHandler
         $cartSession = $session->get('cart', []);
         if (empty($cartSession)) return;
 
+        $cart = $this->getCart($user);
+
+        $products = $this->loadProductsFromSession($cartSession);
+
+        $this->transferSessionCartToDatabase($cart, $cartSession, $products);
+        
+        try {
+            $this->em->persist($cart);
+            $this->em->flush();
+            $session->remove('cart');
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    private function getCart(User $user)
+    {
         $cart = $this->cartRepository->findOneBy([
             'user' => $user,
             'status' => Cart::OPEN
@@ -66,45 +113,50 @@ class CartHandler
         if (!$cart) {
             $cart = new Cart($user);
         }
+
+        return $cart;
+    }
+
+    private function loadProductsFromSession(array $cartSession): array
+    {
+        // Les clefs de $cartSession sont les ids des produits dans le panier
+        $products = $this->productRepository->findByIds(array_keys($cartSession));
         
-        $productIds = array_keys($cartSession);
-        $products = $this->productRepository->findByIds($productIds);
-        // indexation des produits par ID (optimisation)
+        // indexation des produits par id pour optimiser le transfert du panier en session en bdd
         $productsById = [];
         foreach ($products as $product) {
             $productsById[$product->getId()] = $product;
         }
+        
+        return $productsById;
+    }
 
-        foreach ($cartSession as $productId => $qty) {      
-            // Le produit aurait pu être supprimé par l'admin entre temps      
+    private function transferSessionCartToDatabase(Cart $cart, array $cartSession, array $productsById): void
+    {
+        foreach ($cartSession as $productId => $qty) {
+            // Le produit aurait pu être supprimé par l'admin entre temps
             if (!isset($productsById[$productId])) continue;
 
             $product = $productsById[$productId];
+            $existingLine = $this->findExistingCartLine($cart, $product->getId());
 
-            // On gère le cas où un produit est dans le panier en BDD et aussi dans le panier en session
-            $cartLine = null;
-            foreach ($cart->getCartLines() as $line) {
-                if ($line->getProduct()->getId() === $product->getId()) {
-                    $cartLine = $line;
-                    break;
-                }
-            }
-
-            if ($cartLine) {
-                $cartLine->setQuantity($cartLine->getQuantity() + $qty);
+            if ($existingLine) {
+                $existingLine->setQuantity($existingLine->getQuantity() + $qty);
             } else {
                 $cartLine = new CartLine();
                 $cartLine->setProduct($product)->setQuantity($qty);
                 $cart->addCartLine($cartLine);
             }
         }
+    }
 
-        try {
-            $this->em->persist($cart);
-            $this->em->flush();
-            $session->remove('cart');
-        } catch (\Exception $e) {
-            throw $e;
+    private function findExistingCartLine(Cart $cart, int $productId): ?CartLine
+    {
+        foreach ($cart->getCartLines() as $line) {
+            if ($line->getProduct()->getId() === $productId) {
+                return $line;
+            }
         }
+        return null;
     }
 }
