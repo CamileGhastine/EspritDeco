@@ -88,7 +88,12 @@ final class CartController extends AbstractController
     #[Route('/cart/clear', name: 'app_cart_clear')]
     public function clearAjax(SessionInterface $session, Request $request)
     {
-        $session->remove('cart');
+        if (!$this->getUser()) {
+            $session->remove('cart');
+        } else {
+            $this->em->remove($this->cartHandler->getCart($this->getUser()));
+            $this->em->flush();
+        }
 
         return new JsonResponse(['success' => true]);    
     }
