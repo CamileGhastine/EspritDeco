@@ -19,7 +19,7 @@ class CartLine
 
     #[ORM\ManyToOne(inversedBy: 'cartLines')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Product $Product = null;
+    private ?Product $product = null;
 
     #[ORM\Column]
     private ?int $quantity = null;
@@ -43,12 +43,12 @@ class CartLine
 
     public function getProduct(): ?Product
     {
-        return $this->Product;
+        return $this->product;
     }
 
-    public function setProduct(?Product $Product): static
+    public function setProduct(?Product $product): static
     {
-        $this->Product = $Product;
+        $this->product = $product;
 
         return $this;
     }

@@ -1,26 +1,35 @@
-public function up(Schema $schema): void
+<?php
+
+declare(strict_types=1);
+
+namespace DoctrineMigrations;
+
+use Doctrine\DBAL\Schema\Schema;
+use Doctrine\Migrations\AbstractMigration;
+
+final class Version20260508130000 extends AbstractMigration
 {
-    // FK peut ne pas exister → on évite le crash
-    $this->addSql('SET @fk_exists := (
-        SELECT COUNT(*)
-        FROM information_schema.TABLE_CONSTRAINTS
-        WHERE CONSTRAINT_NAME = "FK_C53D045F4584665A"
-        AND TABLE_NAME = "image"
-    )');
+    public function getDescription(): string
+    {
+        return 'Fix image table foreign key for product';
+    }
 
-    $this->addSql('SET @sql := IF(@fk_exists > 0,
-        "ALTER TABLE image DROP FOREIGN KEY FK_C53D045F4584665A",
-        "SELECT 1"
-    )');
+    public function up(Schema $schema): void
+    {
+        $this->addSql('ALTER TABLE image DROP FOREIGN KEY FK_C53D045F4584665A');
+        $this->addSql('ALTER TABLE image 
+            ADD CONSTRAINT FK_C53D045F4584665A 
+            FOREIGN KEY (product_id) 
+            REFERENCES product (id) 
+            ON DELETE CASCADE
+        ');
+    }
 
-    $this->addSql('PREPARE stmt FROM @sql');
-    $this->addSql('EXECUTE stmt');
-    $this->addSql('DEALLOCATE PREPARE stmt');
-
-    // ⚠️ IMPORTANT : ne change PAS path → name si ça existe déjà
-    // donc on supprime cette ligne si ta colonne est déjà "name"
-    // $this->addSql('ALTER TABLE image CHANGE path name VARCHAR(255) NOT NULL');
-
-    $this->addSql('ALTER TABLE image ADD CONSTRAINT FK_C53D045F4584665A 
-        FOREIGN KEY (product_id) REFERENCES product (id)');
+    public function down(Schema $schema): void
+    {
+        $this->addSql('ALTER TABLE image DROP FOREIGN KEY FK_C53D045F4584665A');
+        $this->addSql('ALTER TABLE image 
+            ADD INDEX IDX_C53D045F4584665A (product_id)
+        ');
+    }
 }
