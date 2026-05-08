@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Entity\User;
 use App\Repository\ProductRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -43,6 +44,16 @@ class CartHandler
         $cart = $this->request->getSession()->get('cart', []);
 
         return array_sum($cart);
+    }
+
+    public function persistCart(User $user)
+    {
+        if (!$user) return;
+
+        $cart = $this->getCart();
+
+        dump($cart);
+
     }
 
 

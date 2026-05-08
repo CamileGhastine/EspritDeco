@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Product;
-use App\Repository\ProductRepository;
 use App\Service\CartHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class CartController extends AbstractController
 { 
     #[Route('/cart/add/{id<[0-9]+>}', name: 'app_cart_add', methods: ['POST'])]
-    public function add(Product $product, SessionInterface $session, ProductRepository $productRepository): Response
+    public function add(Product $product, SessionInterface $session): Response
     {
         $this->addToCart($product, $session);
         $this->addFlash(
@@ -52,6 +51,7 @@ final class CartController extends AbstractController
         $productId = $product->getId();
         $cart[$productId] = ($cart[$productId] ?? 0) + 1;
         $session->set('cart', $cart);
+        
         return $cart;
     }
 

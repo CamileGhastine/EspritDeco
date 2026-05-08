@@ -17,7 +17,6 @@ final class ProductController extends AbstractController
     #[Route('/', name: 'app_product_index')]
     public function index(SessionInterface $session): Response
     {
-        dump($session->get('cart'));
         return $this->render('product/index.html.twig', [
             'products' => $this->productRepository->findAllWithCategoryAndPrincipalImage()
         ]);
