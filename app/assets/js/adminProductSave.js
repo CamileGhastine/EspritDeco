@@ -10,9 +10,10 @@ document.getElementById('add-image-btn').addEventListener('click', () => {
 
 window.deleteImage = async function deleteImage(btn) {
     const id = btn.dataset.id;
+    const url = btn.dataset.url;
     const token = btn.dataset.token;
 
-    const res = await fetch(`/admin/product/image/delete/${id}`, {
+    const res = await fetch(url , {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `token=${token}`
@@ -31,9 +32,10 @@ window.deleteImage = async function deleteImage(btn) {
 
 window.setPrincipal = async function setPrincipal(btn) {
     const id = btn.dataset.id;
+    const url = btn.dataset.url;
     const token = btn.dataset.token;
-
-    const res = await fetch(`/admin/product/image/principal/${id}`, {
+    
+    const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `token=${token}`

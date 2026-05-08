@@ -43,6 +43,7 @@
                             <span type="button"
                                 class="{{ image.isPrincipal ? 'd-none' : '' }}"
                                 id="btn-star-{{ image.id }}"
+                                data-url="{{ path('app_admin_image_principal', {id: image.id }) }}"
                                 data-id="{{ image.id }}"
                                 data-token="{{ csrf_token('principal-image-' ~ image.id) }}"
                                 onclick="setPrincipal(this)">
