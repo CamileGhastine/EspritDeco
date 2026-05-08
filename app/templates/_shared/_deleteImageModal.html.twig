@@ -16,7 +16,8 @@
                     class="btn btn-primary" 
                     data-token="{{ csrf_token('delete-image-' ~ image.id) }}"
                     onclick="deleteImage(this)"
-                    data-id="{{ image.id }}">
+                    data-id="{{ image.id }}"
+                    data-url="{{ path('app_admin_image_delete', {id:image.id}) }}">
                     Supprimer
                 </button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
