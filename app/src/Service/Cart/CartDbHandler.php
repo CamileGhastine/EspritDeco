@@ -71,10 +71,7 @@ class CartDbHandler implements CartStorageInterface
     {
         $user = $this->security->getUser();
 
-        $cart = $this->cartRepository->findOneBy([
-            'user' => $user,
-            'status' => Cart::OPEN
-        ]);
+        $cart = $this->cartRepository->findOpenWithLineAndProduct($user);
 
         return $cart ?? new Cart($user);
     }

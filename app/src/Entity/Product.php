@@ -34,9 +34,16 @@ class Product
     #[ORM\ManyToOne(inversedBy: 'products')]
     private ?Category $category = null;
 
+    /**
+     * @var Collection<int, CartLine>
+     */
+    #[ORM\OneToMany(targetEntity: CartLine::class, mappedBy: 'product')]
+    private Collection $cartLines;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->cartLines = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -125,5 +132,35 @@ class Product
     public function hasImages()
     { 
         return (bool)count($this->getImages());
+    }
+
+    /**
+     * @return Collection<int, CartLine>
+     */
+    public function getCartLines(): Collection
+    {
+        return $this->cartLines;
+    }
+
+    public function addCartLine(CartLine $cartLine): static
+    {
+        if (!$this->cartLines->contains($cartLine)) {
+            $this->cartLines->add($cartLine);
+            $cartLine->setP($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCartLine(CartLine $cartLine): static
+    {
+        if ($this->cartLines->removeElement($cartLine)) {
+            // set the owning side to null (unless already changed)
+            if ($cartLine->getP() === $this) {
+                $cartLine->setP(null);
+            }
+        }
+
+        return $this;
     }
 }
