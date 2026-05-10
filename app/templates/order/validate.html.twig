@@ -3,7 +3,50 @@
 {% block title %}Commande{% endblock %}
 
 {% block body %}
-    <h2>Validation de la commande</h2>
-    
+    <h1 class="text-center">Validation de la commande</h1>
+    <div class="my-5">
+        <h2>Récapitulatif de votre comande</h2>
+            <table class="table table-hover">
+                <tbody>
+                        {% for item in cart.items %}
+                            <tr class="table-secondary" data-product-id="{{ item.product.id }}">
+                                <td>{{ item.product.title }}</td>
+                                <td>
+                                    <span class="item-qty">{{ item.quantity }} x {{ item.product.price }} €</span>
+                                </td>
+                                <td class="line-total">
+                                    {{ (item.product.price * item.quantity) | number_format(2, '.', ' ') }} €
+                                </td>
+                            </tr>            
+                        {% endfor %}
+                    <tr class="table-type">
+                        <td></td>
+                        <td>TOTAL</td>
+                        <td id="cart-total">
+                            {{ (cart.totalPrice) | number_format(2, '.', ' ') }} €  
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="card text-white bg-secondary mb-3">
+                <h2 class="card-header">Adresse de livraison</h2>
+                <div class="card-body">
+                   <p class="card-text">{{ address.fullname }}</p>
+                   <p class="card-text">{{ address.street }}</p>
+                   <p class="card-text">{{ address.zipCode }}</p>
+                   <p class="card-text">{{ address.City }}</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-6">
+                    <a href="{{ path('app_order_address') }}" class="btn btn-secondary">Modifier l'adresse de livraison</a>
+                </div>
+                <div class="col-6 text-end">
+                    <a href="{{ path('app_order_address') }}" class="btn btn-primary">Confirmer</a>
+                </div>
+            </div>
+
+    </div>
 
 {% endblock %}

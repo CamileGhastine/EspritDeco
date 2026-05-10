@@ -6,6 +6,7 @@ use App\Entity\Address;
 use App\Entity\Order;
 use App\Form\AddressType;
 use App\Repository\OrderRepository;
+use App\Service\Cart\CartHandler;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,13 +18,14 @@ final class OrderController extends AbstractController
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private OrderRepository $orderRepository
+        private OrderRepository $orderRepository,
+        private CartHandler $cartHandler
         ) {}
 
     #[Route('/order/address', name: 'app_order_address')]
     public function address(Request $request): Response
     {
-        $order = $this->orderRepository->findOneWithAddress($this->getUser()) 
+        $order = $this->orderRepository->findOneWithAddress($this->getUser())
             ?? new Order;
         $address = $order->getAddress();
 
@@ -55,7 +57,17 @@ final class OrderController extends AbstractController
     #[Route('/order/validate', name: 'app_order_validate')]
     public function validate(Request $request): Response
     {
+        $order = $this->orderRepository->findOneWithAddress($this->getUser());
+
+        if (!$order) {
+            $this->addFlash('error', 'Constituez votre panier pour passer commande.');
+
+            return $this->redirectToRoute('app_product_index');
+        }
+
         return $this->render('order/validate.html.twig', [
+            'cart' => $this->cartHandler->getCartDetails(),
+            'address' => $order->getAddress()
         ]);
     }
 }
