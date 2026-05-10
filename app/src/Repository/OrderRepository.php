@@ -18,13 +18,29 @@ class OrderRepository extends ServiceEntityRepository
     }
 
 
-    public function findOneWithAddress(User $user): ?Order
+    public function findOnePendingWithAddress(User $user): ?Order
     {
         return $this->createQueryBuilder('o')
             ->leftJoin('o.address', 'a')
             ->addSelect('a')
             ->andWhere('o.user = :user')
             ->setParameter('user', $user)
+            ->andWhere('o.status = :status')
+            ->setParameter('status', Order::PENDING_PAYMENT)
+            ->getQuery()
+            ->getOneOrNullResult()
+        ;
+    }
+
+    public function findOnePendingWithLine(User $user): ?Order
+    {
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.orderLines', 'ol')
+            ->addSelect('ol')
+            ->andWhere('o.user = :user')
+            ->setParameter('user', $user)
+            ->andWhere('o.status = :status')
+            ->setParameter('status', Order::PENDING_PAYMENT)
             ->getQuery()
             ->getOneOrNullResult()
         ;

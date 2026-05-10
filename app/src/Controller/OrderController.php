@@ -13,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class OrderController extends AbstractController
 {
@@ -23,9 +24,10 @@ final class OrderController extends AbstractController
         ) {}
 
     #[Route('/order/address', name: 'app_order_address')]
+    #[IsGranted('ROLE_USER')]
     public function address(Request $request): Response
     {
-        $order = $this->orderRepository->findOneWithAddress($this->getUser())
+        $order = $this->orderRepository->findOnePendingWithAddress($this->getUser())
             ?? new Order;
         $address = $order->getAddress();
 
@@ -55,12 +57,13 @@ final class OrderController extends AbstractController
     }
 
     #[Route('/order/validate', name: 'app_order_validate')]
+    #[IsGranted('ROLE_USER')]
     public function validate(Request $request): Response
     {
-        $order = $this->orderRepository->findOneWithAddress($this->getUser());
+        $order = $this->orderRepository->findOnePendingWithAddress($this->getUser());
 
         if (!$order) {
-            $this->addFlash('error', 'Constituez votre panier pour passer commande.');
+            $this->addFlash('danger', 'Constituez votre panier pour passer commande.');
 
             return $this->redirectToRoute('app_product_index');
         }

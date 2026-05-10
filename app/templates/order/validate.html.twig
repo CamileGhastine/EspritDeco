@@ -34,7 +34,7 @@
                    <p class="card-text">{{ address.fullname }}</p>
                    <p class="card-text">{{ address.street }}</p>
                    <p class="card-text">{{ address.zipCode }}</p>
-                   <p class="card-text">{{ address.City }}</p>
+                   <p class="card-text">{{ address.fullname }}</p>
                 </div>
             </div>
 
@@ -43,7 +43,7 @@
                     <a href="{{ path('app_order_address') }}" class="btn btn-secondary">Modifier l'adresse de livraison</a>
                 </div>
                 <div class="col-6 text-end">
-                    <a href="{{ path('app_order_address') }}" class="btn btn-primary">Confirmer</a>
+                    <a href="{{ path('app_payment') }}" class="btn btn-primary">Confirmer</a>
                 </div>
             </div>
 

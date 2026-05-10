@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Service\Cart\CartHandler;
+use App\Service\OrderHandler;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -65,9 +66,11 @@ final class CartController extends AbstractController
     }
 
     #[Route('/cart/clear', name: 'app_cart_clear', methods: ['POST'])]
-    public function clearAjax(): JsonResponse
+    public function clearAjax(OrderHandler $orderHandler): JsonResponse
     {
         $this->cartHandler->clearCart();
+
+        $orderHandler->clearOrder($this->getUser());
 
         return new JsonResponse(['success' => true]);    
     }

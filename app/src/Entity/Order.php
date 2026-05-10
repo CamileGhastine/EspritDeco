@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\OrderRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
@@ -34,6 +36,17 @@ class Order
 
     #[ORM\OneToOne(inversedBy: 'purchaseOrder', cascade: ['persist', 'remove'])]
     private ?Address $address = null;
+
+    /**
+     * @var Collection<int, OrderLine>
+     */
+    #[ORM\OneToMany(targetEntity: OrderLine::class, mappedBy: 'purchaseOrder', orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $orderLines;
+
+    public function __construct()
+    {
+        $this->orderLines = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +116,36 @@ class Order
 
         if ($address && $address->getPurchaseOrder() !== $this) {
             $address->setPurchaseOrder($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderLine>
+     */
+    public function getOrderLines(): Collection
+    {
+        return $this->orderLines;
+    }
+
+    public function addOrderLine(OrderLine $orderLine): static
+    {
+        if (!$this->orderLines->contains($orderLine)) {
+            $this->orderLines->add($orderLine);
+            $orderLine->setPurchaseOrder($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderLine(OrderLine $orderLine): static
+    {
+        if ($this->orderLines->removeElement($orderLine)) {
+            // set the owning side to null (unless already changed)
+            if ($orderLine->getPurchaseOrder() === $this) {
+                $orderLine->setPurchaseOrder(null);
+            }
         }
 
         return $this;
