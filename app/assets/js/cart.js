@@ -1,3 +1,4 @@
+// Vider le panier
 const clearBtn = document.getElementById('clear-cart');
 
 if (clearBtn) {
@@ -22,6 +23,7 @@ if (clearBtn) {
     });
 }
 
+// Ajouter (+) une unité sur un produit du panier
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.increase-cart');
     if (!btn) return;
@@ -39,6 +41,7 @@ document.addEventListener('click', (e) => {
         .catch(err => console.error(err));
 });
 
+// Supprimer (-) une unité sur un produit du panier
 document.addEventListener('click', (e) => {
     const btn = e.target.closest('.decrease-cart');
     if (!btn) return;

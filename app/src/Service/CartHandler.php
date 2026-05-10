@@ -4,12 +4,15 @@ namespace App\Service;
 
 use App\Entity\Cart;
 use App\Entity\CartLine;
+use App\Entity\Product;
 use App\Entity\User;
 use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class CartHandler
 {
@@ -64,6 +67,83 @@ class CartHandler
             ];
     }
 
+    public function addToCart(Product $product): array
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            $cart = $this->request->getSession()->get('cart', []);
+            $productId = $product->getId();
+            $cart[$productId] = ($cart[$productId] ?? 0) + 1;
+            $this->request->getSession()->set('cart', $cart);            
+        } else {
+            $cartDb = $this->getCart($user);
+            $existingLine = $this->findExistingCartLine($cartDb, $product->getId());
+            if ($existingLine) {
+                $existingLine->setQuantity($existingLine->getQuantity() + 1);
+            } else {
+                $cartLine = new CartLine();
+                $cartLine->setProduct($product)->setQuantity(1);
+                $cartDb->addCartLine($cartLine);
+            }
+            
+            $this->em->persist($cartDb);
+            $this->em->flush();
+            
+            $cart = [];
+            foreach ($cartDb->getCartLines() as $cartLine) {
+                $cart[$cartLine->getProduct()->getId()] = $cartLine->getQuantity();
+            } 
+        }
+
+        return $cart;
+    }
+
+    public function removeFromCart(Product $product): array
+    {
+        $user = $this->security->getUser();
+        if (!$user) {
+            $cart = $this->request->getSession()->get('cart', []);
+            $productId = $product->getId();
+
+            if (!isset($cart[$productId])) {
+                return $cart;
+            }
+
+            $cart[$productId]--;
+
+            if ($cart[$productId] <= 0) {
+                unset($cart[$productId]);
+            }
+
+            $this->request->getSession()->set('cart', $cart);
+        } else {
+            $cartDb = $this->getCart($user);
+            $existingLine = $this->findExistingCartLine($cartDb, $product->getId());
+            if ($existingLine) {
+                if ($existingLine->getQuantity() > 1) {
+                    $existingLine->setQuantity($existingLine->getQuantity() - 1);
+                    $this->em->persist($cartDb);
+                } else {
+                    $cartDb->removeCartLine($existingLine);
+                    $this->em->remove($existingLine);
+                }
+
+                if (($cartDb->getCartLines())->count() === 0) {
+                    $this->em->remove($cartDb);
+                }
+
+                $this->em->flush();
+            }
+            
+            $cart = [];
+            foreach ($cartDb->getCartLines() as $cartLine) {
+                $cart[$cartLine->getProduct()->getId()] = $cartLine->getQuantity();
+            } 
+        }
+
+        return $cart;
+    }
+
     public function getTotalQuantity(): int
     {       
         $user = $this->security->getUser();
@@ -94,13 +174,9 @@ class CartHandler
 
         $this->transferSessionCartToDatabase($cart, $cartSession, $products);
         
-        try {
-            $this->em->persist($cart);
-            $this->em->flush();
-            $session->remove('cart');
-        } catch (\Exception $e) {
-            throw $e;
-        }
+        $this->em->persist($cart);
+        $this->em->flush();
+        $session->remove('cart');
     }
 
     public function getCart(User $user)
@@ -157,6 +233,20 @@ class CartHandler
                 return $line;
             }
         }
+
         return null;
+    }
+
+    public function clearCart(): void
+    {
+        $user = $this->security->getUser();
+
+        if (!$user) {
+            $this->request->getSession()->remove('cart');
+        } else {
+            $cart = $this->getCart($user);
+            $this->em->remove($cart);
+            $this->em->flush();
+        }
     }
 }
