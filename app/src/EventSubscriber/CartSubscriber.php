@@ -2,7 +2,7 @@
 
 namespace App\EventSubscriber;
 
-use App\Service\CartHandler;
+use App\Service\Cart\CartHandler;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
@@ -13,7 +13,7 @@ class CartSubscriber implements EventSubscriberInterface
     }
     public function onLoginSuccessEvent(LoginSuccessEvent $event): void
     {
-        $this->cartHandler->persistCart($event->getUser());
+        $this->cartHandler->persistCart();
     }
 
     public static function getSubscribedEvents(): array

@@ -1,26 +1,17 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Cart;
 
-use App\Entity\Cart;
-use App\Entity\CartLine;
 use App\Entity\Product;
-use App\Entity\User;
-use App\Repository\CartRepository;
 use App\Repository\ProductRepository;
 use App\Service\Cart\CartDbHandler;
 use App\Service\Cart\CartSessionHandler;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\RequestStack;
 
 class CartHandler
 {
     public function __construct(
-        private RequestStack $request,
         private ProductRepository $productRepository,
-        private EntityManagerInterface $em,
-        private CartRepository $cartRepository,
         private Security $security,
         private CartSessionHandler $cartSessionHandler,
         private CartDbHandler $cartDbHandler
@@ -122,7 +113,8 @@ class CartHandler
         return $totalItems;
     }
 
-    public function persistCart(User $user)
+    // Appelée par l'EventSUbscriber CartSubscriber
+    public function persistCart()
     {
         $cartSession = $this->cartSessionHandler->getCart();
         if (empty($cartSession)) return;

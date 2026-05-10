@@ -4,7 +4,7 @@ twig:
     globals:
         legal_documents: '%legal_documents%'
         upload_image_path: '%upload_image_path%' 
-        cartHandler: '@App\Service\CartHandler'  
+        cartHandler: '@App\Service\Cart\CartHandler'  
 when@test:
     twig:
         strict_variables: true
